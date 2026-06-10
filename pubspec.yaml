@@ -1,0 +1,31 @@
+name: app_quan_ly_ban_hang
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.24.2
+  firebase_auth: ^4.16.0
+  cloud_firestore: ^4.14.0 # Thêm Firestore
+  google_generative_ai: ^0.4.3 # Thêm Gemini AI cho Chatbot
+
+  cupertino_icons: ^1.0.8
+  intl: ^0.20.2
+  shared_preferences: ^2.5.4
+  simple_barcode_scanner: ^0.4.0
+  image_picker: ^1.2.1
+  fl_chart: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

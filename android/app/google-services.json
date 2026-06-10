@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "128572934581",
+    "project_id": "app-quan-ly-ban-hang-aa6cc",
+    "storage_bucket": "app-quan-ly-ban-hang-aa6cc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128572934581:android:17a4d37b9a18ea3df531fc",
+        "android_client_info": {
+          "package_name": "com.example.app_quan_ly_ban_hang"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9NJ_psfn6yne6aSV7C7QWUDddPICqxKM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
