@@ -44,7 +44,7 @@ Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình
 - **Thẩm định nguồn hàng qua Multimodal Vision AI (Gemini Scout):** Chụp ảnh bao bì thực tế để nhận diện thương hiệu, định giá tham chiếu, đánh giá nguy cơ hàng nhái và tự động điền dữ liệu vào form tạo hàng.
 - **Toàn vẹn giao dịch:** Sử dụng `WriteBatch` trên Cloud Firestore đảm bảo cập nhật đồng bộ 4 bảng: Hóa đơn (`orders`), trừ kho (`products`), ghi nhận sổ quỹ (`transactions`) và cập nhật điểm thưởng (`customers`) tuân thủ nghiêm ngặt nguyên tắc ACID.
 - **Trợ lý Cố vấn chiến lược bán lẻ:** Đàm thoại hai chiều thông minh, tự động tiêm ngữ cảnh vận hành thực tế (doanh thu trong ngày, giá trị vốn tồn kho, danh mục 30 mặt hàng chủ lực) để đưa ra khuyến nghị kinh doanh theo mùa vụ.
-- **Gợi ý bán kèm thông minh (AI Cross-selling):** Khi thao tác chọn hàng, AI tự động phân tích giỏ hàng hiện tại đối chiếu với hàng tồn khả dụng trong kho để đề xuất ngay 3 mặt hàng bán kèm phù hợp (hỗ trợ Debounce chống spam request).
+- **Gợi ý bán kèm thông minh:** Khi thao tác chọn hàng, AI tự động phân tích giỏ hàng hiện tại đối chiếu với hàng tồn khả dụng trong kho để đề xuất ngay 3 mặt hàng bán kèm phù hợp.
 - **Tối ưu hóa tài nguyên:** Áp dụng Cache-Aside Pattern với `SharedPreferences` cho điểm tin kinh doanh hàng ngày, đảm bảo chỉ gọi API 01 lần/ngày, triệt tiêu chi phí hạn mức.
 - **Bảo mật giao dịch tài chính nội bộ:** Thiết lập hàng rào xác thực bằng mã PIN 4 chữ số của chủ cửa hàng khi cấu hình tài khoản ngân hàng thụ hưởng, ngăn chặn gian lận tráo mã QR cá nhân.
 
@@ -85,21 +85,21 @@ Yêu cầu môi trường
 - Tài khoản Google AI Studio để lấy GEMINI_API_KEY
 - Dự án Firebase Console đã kích hoạt Authentication và Firestore
 
-Cài đặt mã nguồn
+- Cài đặt mã nguồn
 Clone repository
 git clone [https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git(https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git)
 
-Di chuyển vào thư mục dự án
+- Di chuyển vào thư mục dự án
 cd HiPOS-SmartRetailSystem
 
-Cài đặt các gói thư viện
+- Cài đặt các gói thư viện
 flutter pub get
 
-Cấu hình biến môi trường và Firebase
-- Tạo tệp .env tại thư mục gốc và cung cấp khóa API:Đoạn mãGEMINI_API_KEY=your_gemini_api_key_here
-- Đặt tệp cấu hình google-services.json tải từ Firebase Console vào đường dẫn:android/app/google-services.json
+- Cấu hình biến môi trường và Firebase
+Tạo tệp .env tại thư mục gốc và cung cấp khóa API:Đoạn mãGEMINI_API_KEY=your_gemini_api_key_here
+Đặt tệp cấu hình google-services.json tải từ Firebase Console vào đường dẫn:android/app/google-services.json
 
-Khởi chạy ứng dụng
+- Khởi chạy ứng dụng
 Khởi chạy trên thiết bị di động Android
 flutter run
 
