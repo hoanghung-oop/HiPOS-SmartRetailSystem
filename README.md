@@ -96,8 +96,8 @@ flutter pub get
 ```
 ### 3. Cấu hình biến môi trường và Firebase
 ```bash
-- Tạo tệp .env tại thư mục gốc và cung cấp khóa API:Đoạn mãGEMINI_API_KEY=your_gemini_api_key_here
-- Đặt tệp cấu hình google-services.json tải từ Firebase Console vào đường dẫn:android/app/google-services.json
+- Tạo tệp .env tại thư mục gốc và cung cấp khóa API: GEMINI_API_KEY=your_gemini_api_key_here
+- Đặt tệp cấu hình google-services.json tải từ Firebase Console vào đường dẫn: android/app/google-services.json
 ```
 ### 4. Khởi chạy ứng dụng
 ```bash
