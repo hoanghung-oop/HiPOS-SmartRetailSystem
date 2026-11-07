@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <strong>Giải pháp quản lý bán lẻ đa nền tảng kết hợp Trí tuệ nhân tạo thế hệ mới</strong>
+  <strong>Giải pháp quản lý bán lẻ đa nền tảng kết hợp trí tuệ nhân tạo thế hệ mới</strong>
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
 
 ---
 
-## 📖 Giới Thiệu
+## 📖 Giới thiệu
 
 **HiPOS** là hệ thống phần mềm quản lý bán lẻ đa nền tảng được xây dựng trên framework **Flutter**, khai thác kiến trúc không máy chủ **Firebase BaaS** (Cloud Firestore, Firebase Authentication) kết hợp sức mạnh phân tích của mô hình đa phương thức **Google Gemini 2.5 Flash**. 
 
@@ -26,7 +26,7 @@ Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình
 
 ---
 
-## 🌟 Tính Năng Cốt Lõi
+## 🌟 Tính năng cốt lõi
 
 - **Voice POS Pipeline:** Bóc tách ngôn ngữ tự nhiên tiếng Việt thời gian thực (tự động khử dấu thanh, phân đoạn mệnh đề liên từ, nhận diện từ chỉ số lượng ngữ nghĩa) hỗ trợ lên đơn hàng rảnh tay tại quầy thu ngân.
 - **Thanh toán VietQR động chuẩn NAPAS 247:** Tự động sinh chuỗi mã QR chuyển khoản định danh kèm chính xác số tiền cần thu; hỗ trợ luồng thanh toán đa phương thức (kết hợp tiền mặt và quét QR động).
@@ -39,7 +39,7 @@ Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình
 
 ---
 
-## 🏗️ Kiến Trúc & công Nghệ
+## 🏗️ Kiến Trúc & công nghệ
 
 - **Ngôn ngữ & Framework:** Dart (Sound Null Safety) & Flutter SDK
 - **Kiến trúc phần mềm:** Layered Architecture kết hợp mô hình Boundary-Control-Entity (BCE)
@@ -52,7 +52,7 @@ Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình
 
 ---
 
-## 📂 Cấu Trúc Thư Mục (Project Structure)
+## 📂 Cấu trúc thư mục (Project Structure)
 
 ```text
 lib/
@@ -66,15 +66,15 @@ lib/
 
 ---
 
-## 🚀 Cài Đặt Và khởi chạy
-### 1. Yêu cầu môi trường
+## 🚀 Cài Đặt và khởi chạy
+1. Yêu cầu môi trường
 - Flutter SDK $\ge 3.19.0$
 - Dart SDK $\ge 3.0.0$
 - Công cụ: Android Studio hoặc Visual Studio Code
 - Tài khoản Google AI Studio để lấy GEMINI_API_KEY
 - Dự án Firebase Console đã kích hoạt Authentication và Firestore
 
-### 2. Cài đặt mã nguồn
+2. Cài đặt mã nguồn
 # Clone repository
 git clone [https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git(https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git)
 
@@ -84,11 +84,11 @@ cd HiPOS-SmartRetailSystem
 # Cài đặt các gói thư viện
 flutter pub get
 
-### 3. Cấu hình biến môi trường và Firebase
+3. Cấu hình biến môi trường và Firebase
 - Tạo tệp .env tại thư mục gốc và cung cấp khóa API:Đoạn mãGEMINI_API_KEY=your_gemini_api_key_here
 - Đặt tệp cấu hình google-services.json tải từ Firebase Console vào đường dẫn:android/app/google-services.json
 
-### 4. Khởi chạy ứng dụng
+4. Khởi chạy ứng dụng
 # Khởi chạy trên thiết bị di động Android
 flutter run
 
