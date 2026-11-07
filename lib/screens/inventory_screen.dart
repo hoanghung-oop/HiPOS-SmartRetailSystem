@@ -1,6 +1,8 @@
 // File: lib/screens/inventory_screen.dart
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 // ignore: deprecated_member_use
@@ -8,6 +10,8 @@ import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import '../models/product_model.dart';
 import '../services/firestore_service.dart';
 import 'add_product_page.dart';
+import 'ai_scout_report_screen.dart';
+import 'dart:convert';
 
 class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
@@ -40,6 +44,26 @@ class _InventoryScreenState extends State<InventoryScreen> {
     });
   }
 
+  // Hàm xử lý mở Camera hoặc Thư viện tùy nền tảng
+  Future<void> _handleAiScout(ImageSource source) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(
+      source: source,
+      maxWidth: 600,
+      maxHeight: 600,
+      imageQuality: 75,
+    );
+
+    if (pickedFile != null && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AiScoutReportScreen(capturedImage: pickedFile),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,12 +88,43 @@ class _InventoryScreenState extends State<InventoryScreen> {
           Expanded(child: _buildProductList()),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddProductPage()));
-        },
-        backgroundColor: Colors.blue[600],
-        child: const Icon(Icons.add, color: Colors.white),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+
+            // 2. NÚT AI CHÍNH:
+            // - Điện thoại: Mở ngay Camera
+            // - Web: Mở cửa sổ chọn file từ máy tính
+            FloatingActionButton(
+              heroTag: 'ai_scout_btn',
+              onPressed: () => _handleAiScout(
+                kIsWeb ? ImageSource.gallery : ImageSource.camera,
+              ),
+              backgroundColor: Colors.orangeAccent,
+              foregroundColor: Colors.white,
+              tooltip: kIsWeb ? "Tải ảnh từ máy tính" : "Chụp ảnh thẩm định",
+              child: const Icon(Icons.auto_awesome),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 3. NÚT THÊM HÀNG HÓA
+            FloatingActionButton(
+              heroTag: 'add_product_btn',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddProductPage()),
+                );
+              },
+              backgroundColor: Colors.blue,
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -106,12 +161,14 @@ class _InventoryScreenState extends State<InventoryScreen> {
   Widget _buildProductList() {
     if (_filteredProducts.isEmpty) return const Center(child: Text("Chưa có hàng hóa nào"));
     return ListView.separated(
+      // Thêm padding này để khi cuộn xuống cuối cùng, các món hàng sẽ trồi hẳn lên trên 2 nút
+      padding: const EdgeInsets.only(bottom: 120),
       itemCount: _filteredProducts.length,
       separatorBuilder: (ctx, i) => const Divider(height: 1),
       itemBuilder: (ctx, i) {
         final p = _filteredProducts[i];
         return ListTile(
-          leading: p.imagePath.isNotEmpty && File(p.imagePath).existsSync() ? ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(File(p.imagePath), width: 50, height: 50, fit: BoxFit.cover)) : Container(width: 50, height: 50, decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.image)),
+          leading: buildCrossPlatformImage(p.imagePath, width: 50, height: 50, borderRadius: 8),
           title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
           subtitle: Text("Mã: ${p.barcode} | Tồn: ${p.quantity}"),
           trailing: Text(currencyFormat.format(_showSellPrice ? p.price : p.importPrice), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
@@ -165,7 +222,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         child: Column(children: [
           Container(
             width: double.infinity, height: 250, color: Colors.white,
-            child: _currentP.imagePath.isNotEmpty && File(_currentP.imagePath).existsSync() ? Image.file(File(_currentP.imagePath), fit: BoxFit.contain) : const Icon(Icons.image, size: 100, color: Colors.grey),
+            child: buildCrossPlatformImage(_currentP.imagePath, width: double.infinity, height: 250, fit: BoxFit.contain, borderRadius: 0),
           ),
           const SizedBox(height: 10),
           Container(
@@ -256,15 +313,17 @@ class _EditProductPageState extends State<EditProductPage> {
   void initState() {
     super.initState();
     final p = widget.product;
+    final fmt = NumberFormat.decimalPattern('vi_VN'); // Khởi tạo format để định dạng số ban đầu
+
     _idCtrl = TextEditingController(text: p.id);
     _barcodeCtrl = TextEditingController(text: p.barcode);
     _nameCtrl = TextEditingController(text: p.name);
-    _importPriceCtrl = TextEditingController(text: p.importPrice.toInt().toString());
-    _priceCtrl = TextEditingController(text: p.price.toInt().toString());
-    _quantityCtrl = TextEditingController(text: p.quantity.toString());
+    _importPriceCtrl = TextEditingController(text: fmt.format(p.importPrice.toInt())); // Đã áp dụng format
+    _priceCtrl = TextEditingController(text: fmt.format(p.price.toInt()));             // Đã áp dụng format
+    _quantityCtrl = TextEditingController(text: fmt.format(p.quantity));               // Đã áp dụng format
     _descriptionCtrl = TextEditingController(text: p.description);
     _unitCtrl = TextEditingController(text: p.unit);
-    _minStockCtrl = TextEditingController(text: p.minStock.toString());
+    _minStockCtrl = TextEditingController(text: fmt.format(p.minStock));               // Đã áp dụng format
     _otherInfoCtrl = TextEditingController(text: p.otherInfo);
 
     _category = _categories.contains(p.category) ? p.category : _categories[0];
@@ -293,9 +352,13 @@ class _EditProductPageState extends State<EditProductPage> {
                   decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(12),
-                      image: (_imagePath != null && _imagePath!.isNotEmpty && File(_imagePath!).existsSync()) ? DecorationImage(image: FileImage(File(_imagePath!)), fit: BoxFit.cover) : null
+                      image: getCrossPlatformImageProvider(_imagePath) != null
+                          ? DecorationImage(image: getCrossPlatformImageProvider(_imagePath)!, fit: BoxFit.cover)
+                          : null
                   ),
-                  child: (_imagePath == null || _imagePath!.isEmpty || !File(_imagePath!).existsSync()) ? const Icon(Icons.camera_alt, size: 40, color: Colors.grey) : null
+                  child: getCrossPlatformImageProvider(_imagePath) == null
+                      ? const Icon(Icons.camera_alt, size: 40, color: Colors.grey)
+                      : null
               )
           ),
           const SizedBox(height: 20),
@@ -320,8 +383,22 @@ class _EditProductPageState extends State<EditProductPage> {
     );
   }
 
+  // ĐÃ SỬA: Thêm inputFormatters cho trường nhập số
   Widget _buildField(String label, TextEditingController ctrl, {bool readOnly = false, bool hasScan = false, TextInputType? keyboardType}) {
-    return Padding(padding: const EdgeInsets.only(bottom: 12), child: TextField(controller: ctrl, readOnly: readOnly, keyboardType: keyboardType, decoration: InputDecoration(labelText: label, border: const OutlineInputBorder(), suffixIcon: hasScan ? IconButton(icon: const Icon(Icons.qr_code_scanner, color: Colors.blue), onPressed: () => _scan(ctrl)) : null)));
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: TextField(
+            controller: ctrl,
+            readOnly: readOnly,
+            keyboardType: keyboardType,
+            inputFormatters: keyboardType == TextInputType.number ? [CurrencyInputFormatter()] : [],
+            decoration: InputDecoration(
+                labelText: label,
+                border: const OutlineInputBorder(),
+                suffixIcon: hasScan ? IconButton(icon: const Icon(Icons.qr_code_scanner, color: Colors.blue), onPressed: () => _scan(ctrl)) : null
+            )
+        )
+    );
   }
 
   Widget _buildSelect(String label, String value, List<String> items, Function(String?) onChanged) {
@@ -330,11 +407,42 @@ class _EditProductPageState extends State<EditProductPage> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final res = await showModalBottomSheet<XFile?>(context: context, builder: (ctx) => Column(mainAxisSize: MainAxisSize.min, children: [
-      ListTile(leading: const Icon(Icons.camera_alt), title: const Text("Chụp ảnh mới"), onTap: () async => Navigator.pop(ctx, await picker.pickImage(source: ImageSource.camera))),
-      ListTile(leading: const Icon(Icons.photo_library), title: const Text("Chọn từ thư viện"), onTap: () async => Navigator.pop(ctx, await picker.pickImage(source: ImageSource.gallery))),
-    ]));
-    if (res != null) setState(() => _imagePath = res.path);
+    final res = await showModalBottomSheet<XFile?>(
+      context: context,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.camera_alt),
+            title: const Text("Chụp ảnh mới"),
+            onTap: () async => Navigator.pop(ctx, await picker.pickImage(
+              source: ImageSource.camera,
+              maxWidth: 300,
+              maxHeight: 300,
+              imageQuality: 70,
+            )),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library),
+            title: const Text("Chọn từ thư viện"),
+            onTap: () async => Navigator.pop(ctx, await picker.pickImage(
+              source: ImageSource.gallery,
+              maxWidth: 300,
+              maxHeight: 300,
+              imageQuality: 70,
+            )),
+          ),
+        ],
+      ),
+    );
+
+    if (res != null) {
+      final bytes = await res.readAsBytes();
+      final base64String = base64Encode(bytes);
+      setState(() {
+        _imagePath = "data:image/jpeg;base64,$base64String";
+      });
+    }
   }
 
   Future<void> _scan(TextEditingController ctrl) async {
@@ -345,14 +453,16 @@ class _EditProductPageState extends State<EditProductPage> {
 
   void _save() async {
     if (_nameCtrl.text.isEmpty) return;
+
+    // ĐÃ SỬA: Loại bỏ dấu chấm trước khi chuyển chuỗi thành số để lưu vào database
     final updated = Product(
       id: _idCtrl.text, name: _nameCtrl.text,
-      price: double.tryParse(_priceCtrl.text) ?? 0,
-      importPrice: double.tryParse(_importPriceCtrl.text) ?? 0,
-      quantity: int.tryParse(_quantityCtrl.text) ?? 0,
+      price: double.tryParse(_priceCtrl.text.replaceAll('.', '')) ?? 0,
+      importPrice: double.tryParse(_importPriceCtrl.text.replaceAll('.', '')) ?? 0,
+      quantity: int.tryParse(_quantityCtrl.text.replaceAll('.', '')) ?? 0,
       barcode: _barcodeCtrl.text, imagePath: _imagePath ?? "",
       category: _category, brand: _brand, description: _descriptionCtrl.text,
-      unit: _unitCtrl.text, minStock: int.tryParse(_minStockCtrl.text) ?? 0,
+      unit: _unitCtrl.text, minStock: int.tryParse(_minStockCtrl.text.replaceAll('.', '')) ?? 0,
       otherInfo: _otherInfoCtrl.text, isDirectSale: _isDirectSale, isPointAccumulation: _isPointAccumulation,
     );
 
@@ -395,7 +505,6 @@ class _InventorySearchPageState extends State<InventorySearchPage> {
     });
   }
 
-  // HÀM QUÉT MÃ TRONG TÌM KIẾM: Mở chi tiết hoặc hỏi thêm mới
   Future<void> _scanBarcode() async {
     // ignore: deprecated_member_use
     var res = await Navigator.push(context, MaterialPageRoute(builder: (context) => const SimpleBarcodeScannerPage()));
@@ -473,7 +582,7 @@ class _InventorySearchPageState extends State<InventorySearchPage> {
             itemBuilder: (ctx, i) {
               final p = _results[i];
               return ListTile(
-                leading: p.imagePath.isNotEmpty && File(p.imagePath).existsSync() ? ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.file(File(p.imagePath), width: 45, height: 45, fit: BoxFit.cover)) : const Icon(Icons.image),
+                leading: buildCrossPlatformImage(p.imagePath, width: 45, height: 45, borderRadius: 8),
                 title: Text(p.name),
                 subtitle: Text("Mã: ${p.barcode} | Tồn: ${p.quantity}"),
                 trailing: Text(NumberFormat.decimalPattern('vi_VN').format(p.price), style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -496,6 +605,92 @@ class _InventorySearchPageState extends State<InventorySearchPage> {
         decoration: BoxDecoration(color: active ? Colors.blue : Colors.grey[200], borderRadius: BorderRadius.circular(20)),
         child: Text(label, style: TextStyle(color: active ? Colors.white : Colors.black, fontSize: 13, fontWeight: active ? FontWeight.bold : FontWeight.normal)),
       ),
+    );
+  }
+}
+
+// =======================================================================
+// HELPER METHODS TÍCH HỢP ĐỂ XỬ LÝ ẢNH ĐA NỀN TẢNG (WEB + MOBILE)
+// =======================================================================
+
+Widget buildCrossPlatformImage(String? path, {double width = 50, double height = 50, BoxFit fit = BoxFit.cover, double borderRadius = 8}) {
+  Widget placeholder = Container(
+      width: width, height: height,
+      decoration: BoxDecoration(color: Colors.grey[200], borderRadius: BorderRadius.circular(borderRadius)),
+      child: const Icon(Icons.image, color: Colors.grey)
+  );
+
+  if (path == null || path.isEmpty) return placeholder;
+
+  // 1. Nếu là ảnh nén Base64 (Lưu từ Cloud Firestore)
+  if (path.startsWith('data:image')) {
+    try {
+      final bytes = base64Decode(path.split(',').last);
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.memory(bytes, width: width, height: height, fit: fit, errorBuilder: (c, e, s) => placeholder),
+      );
+    } catch (_) {
+      return placeholder;
+    }
+  }
+
+  // 2. Nếu là ảnh Web/URL
+  if (kIsWeb || path.startsWith('http') || path.startsWith('blob:')) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(borderRadius),
+      child: Image.network(path, width: width, height: height, fit: fit, errorBuilder: (c, e, s) => placeholder),
+    );
+  }
+
+  // 3. Nếu là file trên máy cũ
+  try {
+    if (File(path).existsSync()) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.file(File(path), width: width, height: height, fit: fit, errorBuilder: (c, e, s) => placeholder),
+      );
+    }
+  } catch (_) {}
+
+  return placeholder;
+}
+
+ImageProvider? getCrossPlatformImageProvider(String? path) {
+  if (path == null || path.isEmpty) return null;
+  if (path.startsWith('data:image')) {
+    try {
+      return MemoryImage(base64Decode(path.split(',').last));
+    } catch (_) {
+      return null;
+    }
+  }
+  if (kIsWeb || path.startsWith('http') || path.startsWith('blob:')) {
+    return NetworkImage(path);
+  } else {
+    try {
+      if (File(path).existsSync()) return FileImage(File(path));
+    } catch (_) {}
+  }
+  return null;
+}
+
+// === BỘ ĐỊNH DẠNG SỐ THÔNG MINH ===
+class CurrencyInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+    // Xóa mọi ký tự không phải là số (bao gồm cả dấu chấm cũ)
+    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.isEmpty) return const TextEditingValue(text: '');
+
+    // Chuyển thành số nguyên (tự động xóa số 0 ở đầu) và format có dấu chấm
+    final int value = int.parse(digitsOnly);
+    final String formatted = NumberFormat.decimalPattern('vi_VN').format(value);
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length), // Giữ con trỏ ở cuối
     );
   }
 }

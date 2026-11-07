@@ -30,7 +30,7 @@ class LocalStorage {
   return prefs.getString('app_language') ?? 'vi'; // Mặc định tiếng Việt
   }
 
-  // 3. Lưu lần đầu mở app (để hiện màn hình giới thiệu chẳng hạn)
+  // 3. Lưu lần đầu mở app
   static Future<void> setFirstRun(bool isFirst) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.setBool('is_first_run', isFirst);

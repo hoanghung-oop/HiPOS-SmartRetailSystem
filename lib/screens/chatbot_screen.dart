@@ -1,6 +1,6 @@
 // File: lib/screens/chatbot_screen.dart
 import 'package:flutter/material.dart';
-import '../services/chat_service.dart';
+import '../services/ai_service.dart';
 import '../services/firestore_service.dart';
 import '../models/product_model.dart';
 import '../models/order_model.dart';
@@ -12,14 +12,14 @@ class ChatbotScreen extends StatefulWidget {
 }
 
 class _ChatbotScreenState extends State<ChatbotScreen> {
-  final ChatService _chatService = ChatService();
+  final AIService _chatService = AIService();
   final FirestoreService _firestoreService = FirestoreService();
 
   final TextEditingController _messageCtrl = TextEditingController();
   final ScrollController _scrollController = ScrollController(); // Thêm ScrollController
 
   final List<Map<String, String>> _messages = [
-    {'role': 'ai', 'message': 'Chào bạn! Tôi là trợ lý AI của cửa hàng. Bạn muốn hỏi về hàng hóa đang tồn kho, hay phân tích doanh thu hôm nay?'}
+    {'role': 'ai', 'message': 'Xin chào! Tôi là trợ lý AI của cửa hàng. Hôm nay bạn cần phân tích tình hình kinh doanh hay cần tư vấn về hàng hóa?'}
   ];
 
   List<Product> _currentProducts = [];
@@ -128,6 +128,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     );
   }
 
+  String _cleanMarkdown(String text) {
+    return text
+        .replaceAll('**', '')
+        .replaceAll(RegExp(r'^\s*\*\s*', multiLine: true), '• ')
+        .replaceAll('_', '')
+        .replaceAll(RegExp(r'\n{3,}'), '\n\n');
+  }
+
   Widget _buildChatBubble(Map<String, String> msg) {
     bool isAi = msg['role'] == 'ai';
     return Align(
@@ -147,7 +155,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         ),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         child: Text(
-            msg['message']!,
+            isAi ? _cleanMarkdown(msg['message']!) : msg['message']!,
             style: TextStyle(
               color: isAi ? Colors.black87 : Colors.white,
               fontSize: 15,

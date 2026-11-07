@@ -62,7 +62,17 @@ class OrderModel {
   String customerName;
   String customerPhone;
   List<OrderItem> items;
-  String status; 
+  String status;
+
+  String paymentMethod;
+  Map<String,
+      dynamic> multiPaymentDetails; // Lưu chi tiết nếu là Đa phương thức
+  double totalDiscount;
+  double otherFees;
+  bool isDelivery;
+  double deliveryFee;
+  int pointsUsed;
+  int pointsEarned;
 
   OrderModel({
     required this.id,
@@ -72,27 +82,60 @@ class OrderModel {
     this.customerPhone = '',
     required this.items,
     this.status = 'completed',
+    this.paymentMethod = 'Tiền mặt',
+    this.multiPaymentDetails = const {},
+    this.totalDiscount = 0,
+    this.otherFees = 0,
+    this.isDelivery = false,
+    this.deliveryFee = 0,
+    this.pointsUsed = 0,
+    this.pointsEarned = 0,
   });
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'date': date.toIso8601String(),
-    'totalPrice': totalPrice,
-    'customerName': customerName,
-    'customerPhone': customerPhone,
-    'items': items.map((e) => e.toJson()).toList(),
-    'status': status,
-  };
+  Map<String, dynamic> toJson() =>
+      {
+        'id': id,
+        'date': date.toIso8601String(),
+        'totalPrice': totalPrice,
+        'customerName': customerName,
+        'customerPhone': customerPhone,
+        'items': items.map((e) => e.toJson()).toList(),
+        'status': status,
+        'paymentMethod': paymentMethod,
+        'multiPaymentDetails': multiPaymentDetails,
+        'totalDiscount': totalDiscount,
+        'otherFees': otherFees,
+        'isDelivery': isDelivery,
+        'deliveryFee': deliveryFee,
+        'pointsUsed': pointsUsed,
+        'pointsEarned': pointsEarned,
+      };
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: json['id'],
-      date: DateTime.parse(json['date']),
-      totalPrice: double.tryParse(json['totalPrice'].toString()) ?? 0,
+      id: json['id'] ?? '',
+      date: json['date'] != null ? DateTime.parse(json['date']) : DateTime
+          .now(),
+      totalPrice: double.tryParse(json['totalPrice']?.toString() ?? '0') ?? 0,
       customerName: json['customerName'] ?? 'Khách lẻ',
       customerPhone: json['customerPhone'] ?? '',
-      items: (json['items'] as List).map((item) => OrderItem.fromJson(item)).toList(),
+      items: json['items'] != null
+          ? (json['items'] as List)
+          .map((item) => OrderItem.fromJson(item))
+          .toList()
+          : [],
       status: json['status'] ?? 'completed',
+      paymentMethod: json['paymentMethod'] ?? 'Tiền mặt',
+      multiPaymentDetails: json['multiPaymentDetails'] != null
+          ? Map<String, dynamic>.from(json['multiPaymentDetails'])
+          : const {},
+      totalDiscount: double.tryParse(
+          json['totalDiscount']?.toString() ?? '0') ?? 0,
+      otherFees: double.tryParse(json['otherFees']?.toString() ?? '0') ?? 0,
+      isDelivery: json['isDelivery'] ?? false,
+      deliveryFee: double.tryParse(json['deliveryFee']?.toString() ?? '0') ?? 0,
+      pointsUsed: int.tryParse(json['pointsUsed']?.toString() ?? '0') ?? 0,
+      pointsEarned: int.tryParse(json['pointsEarned']?.toString() ?? '0') ?? 0,
     );
   }
 }

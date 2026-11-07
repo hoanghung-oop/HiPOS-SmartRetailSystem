@@ -17,7 +17,6 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
-
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
@@ -27,6 +26,7 @@ migrate_working_dir/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.packages
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
@@ -43,3 +43,43 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Android artifacts
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+
+# Secret keys & Environment variables
+env.txt
+.env
+*.env
+android/key.properties
+*.keystore
+*.jks
+
+# Firebase credentials
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# Symbol & Flutter plugins
+.flutter-plugins
+
+# Chặn thư mục cache của Firebase CLI
+.firebase/
+
+# Bỏ qua các nền tảng không phát triển
+/windows/
+/macos/
+/linux/
+/ios/
+/web/
+
+test/test/sales_screen_whitebox_test.dart
+test/test/payment_screen_whitebox_test.dart
+test/auth_whitebox_test.dart
+integration_test/sales_flow_test.dart
+android/.gradle/

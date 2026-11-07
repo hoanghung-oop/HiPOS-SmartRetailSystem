@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction_model.dart';
 import '../models/customer_model.dart';
-import '../services/firestore_service.dart'; // Đã đổi sang Firestore
+import '../services/firestore_service.dart';
 
 class CashFlowScreen extends StatefulWidget {
   const CashFlowScreen({super.key});
@@ -14,7 +14,7 @@ class CashFlowScreen extends StatefulWidget {
 }
 
 class _CashFlowScreenState extends State<CashFlowScreen> {
-  final FirestoreService _firestoreService = FirestoreService(); // Khởi tạo service
+  final FirestoreService _firestoreService = FirestoreService();
   List<TransactionModel> _transactions = [];
   List<Customer> _customers = [];
 
@@ -26,21 +26,19 @@ class _CashFlowScreenState extends State<CashFlowScreen> {
   @override
   void initState() {
     super.initState();
-    _listenData(); // Dùng Stream thay vì Future
+    _listenData();
   }
 
   void _listenData() {
-    // Lắng nghe dữ liệu Giao dịch
     _firestoreService.streamTransactions().listen((data) {
       if (mounted) {
         setState(() {
-          data.sort((a, b) => b.date.compareTo(a.date)); // Sắp xếp ngày mới nhất lên đầu
+          data.sort((a, b) => b.date.compareTo(a.date));
           _transactions = data;
         });
       }
     });
 
-    // Lắng nghe dữ liệu Khách hàng để hiển thị tên trong chi tiết
     _firestoreService.streamCustomers().listen((data) {
       if (mounted) setState(() => _customers = data);
     });
@@ -58,7 +56,8 @@ class _CashFlowScreenState extends State<CashFlowScreen> {
     return _totalIncome - _totalExpense;
   }
 
-  Future<void> _addTransaction(bool isExpense) async {
+  // ĐÃ SỬA: Thêm tham số method
+  Future<void> _addTransaction(bool isExpense, String method) async {
     if (_amountController.text.isEmpty || _noteController.text.isEmpty) return;
 
     double amount = double.tryParse(_amountController.text.replaceAll('.', '')) ?? 0;
@@ -69,9 +68,9 @@ class _CashFlowScreenState extends State<CashFlowScreen> {
       amount: amount,
       date: DateTime.now(),
       isExpense: isExpense,
+      paymentMethod: method, // Lưu phương thức thanh toán
     );
 
-    // Lưu thẳng lên Firestore
     await _firestoreService.saveTransaction(trans);
 
     if (mounted) {
@@ -90,7 +89,6 @@ class _CashFlowScreenState extends State<CashFlowScreen> {
           actions: [
             TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text("Hủy")),
             TextButton(onPressed: () async {
-              // Gọi hàm xóa trên Firestore
               await _firestoreService.deleteTransaction(transaction.id);
               if (mounted) Navigator.of(ctx).pop();
             }, child: const Text("Xóa", style: TextStyle(color: Colors.red))),
@@ -99,42 +97,55 @@ class _CashFlowScreenState extends State<CashFlowScreen> {
     );
   }
 
+  // ĐÃ SỬA: Dùng StatefulBuilder để cập nhật UI Dropdown bên trong Dialog
   void _showAddDialog(bool isExpense) {
     _noteController.clear();
     _amountController.clear();
+    String selectedMethod = 'Tiền mặt'; // Mặc định
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(isExpense ? "Ghi khoản CHI" : "Ghi khoản THU", style: TextStyle(color: isExpense ? Colors.red : Colors.green)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [CurrencyInputFormatter()],
-              decoration: const InputDecoration(labelText: "Số tiền", suffixText: "đ", border: OutlineInputBorder()),
-              autofocus: true,
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _noteController,
-              decoration: InputDecoration(
-                  labelText: "Lý do (VD: ${isExpense ? 'Tiền điện' : 'Bán ve chai'})",
-                  border: const OutlineInputBorder()
+      builder: (ctx) => StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: Text(isExpense ? "Ghi khoản CHI" : "Ghi khoản THU", style: TextStyle(color: isExpense ? Colors.red : Colors.green)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _amountController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [CurrencyInputFormatter()],
+                    decoration: const InputDecoration(labelText: "Số tiền", suffixText: "đ", border: const OutlineInputBorder()),
+                    autofocus: true,
+                  ),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    value: selectedMethod,
+                    decoration: const InputDecoration(labelText: "Phương thức", border: OutlineInputBorder()),
+                    items: ['Tiền mặt', 'Chuyển khoản', 'Thẻ', 'Ví'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                    onChanged: (val) => setStateDialog(() => selectedMethod = val!),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _noteController,
+                    decoration: InputDecoration(
+                        labelText: "Lý do (VD: ${isExpense ? 'Tiền điện' : 'Bán ve chai'})",
+                        border: const OutlineInputBorder()
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text("Hủy")),
-          ElevatedButton(
-            onPressed: () => _addTransaction(isExpense),
-            style: ElevatedButton.styleFrom(backgroundColor: isExpense ? Colors.red : Colors.green, foregroundColor: Colors.white),
-            child: const Text("Lưu"),
-          ),
-        ],
+              actions: [
+                TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text("Hủy")),
+                ElevatedButton(
+                  onPressed: () => _addTransaction(isExpense, selectedMethod),
+                  style: ElevatedButton.styleFrom(backgroundColor: isExpense ? Colors.red : Colors.green, foregroundColor: Colors.white),
+                  child: const Text("Lưu"),
+                ),
+              ],
+            );
+          }
       ),
     );
   }
@@ -286,7 +297,7 @@ class _CashFlowScreenState extends State<CashFlowScreen> {
       ),
       child: Column(
         children: [
-          const Text("TIỀN QŨY HIỆN CÓ", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12)),
+          const Text("TIỀN QUỸ HIỆN CÓ", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(height: 8),
           Text(currencyFormat.format(_totalBalance), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
           const SizedBox(height: 20),

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/order_model.dart';
-import '../services/firestore_service.dart'; // 1. Đổi sang import FirestoreService
+import '../services/firestore_service.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -12,7 +12,7 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  final FirestoreService _firestoreService = FirestoreService(); // 2. Khởi tạo service
+  final FirestoreService _firestoreService = FirestoreService();
   List<OrderModel> _orders = [];
   List<OrderModel> _filteredOrders = [];
   final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
@@ -20,15 +20,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _listenOrders(); // 3. Dùng hàm lắng nghe thời gian thực
+    _listenOrders();
   }
 
   void _listenOrders() {
-    // Chỉ lấy những hóa đơn đã hoàn thành ('completed') để hiển thị ở Lịch sử
     _firestoreService.streamOrders('completed').listen((data) {
       if (mounted) {
         setState(() {
-          // Sắp xếp hóa đơn mới nhất lên đầu
           data.sort((a, b) => b.date.compareTo(a.date));
           _orders = data;
           _filteredOrders = data;
@@ -60,11 +58,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return "THỨ ${date.weekday + 1 == 8 ? 'CN' : '${date.weekday + 1}'}, ${DateFormat('dd/MM/yyyy').format(date)}";
   }
 
+  Color _getPaymentMethodColor(String method) {
+    switch (method) {
+      case 'Chuyển khoản QR': return Colors.blue[700]!;
+      case 'Thẻ': return Colors.teal[700]!;
+      case 'Ví': return Colors.purple[700]!;
+      case 'Đa phương thức': return Colors.orange[800]!;
+      case 'Tiền mặt':
+      default:
+        return Colors.green[700]!;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final groupedOrders = _groupOrdersByDate();
     double totalRevenue = 0;
-    for (var o in _filteredOrders) totalRevenue += o.totalPrice;
+    for (var o in _filteredOrders) {
+      if (o.status != 'Đã trả' && o.status != 'returned') {
+        totalRevenue += o.totalPrice;
+      }
+    }
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -74,7 +88,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () async {
-              // Vì dùng Stream nên không cần gọi lại _loadOrders sau khi pop nữa
               await Navigator.push(context, MaterialPageRoute(builder: (context) => OrderSearchPage(allOrders: _orders)));
             },
           ),
@@ -87,7 +100,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             padding: const EdgeInsets.all(16), color: Colors.white,
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text("Tổng tiền hàng", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text("Tổng doanh thu", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 Text("${_filteredOrders.length} hóa đơn", style: const TextStyle(color: Colors.grey)),
               ]),
               Text(currencyFormat.format(totalRevenue), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -115,20 +128,54 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildOrderTile(OrderModel order) {
+    bool isReturned = order.status == 'Đã trả' || order.status == 'returned';
     String itemsText = order.items.isEmpty ? "Không có hàng" : "${order.items[0].productName} x${order.items[0].quantity}${order.items.length > 1 ? ' (+${order.items.length - 1} món khác)' : ''}";
+
     return InkWell(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => OrderDetailScreen(order: order))),
       child: Container(
         padding: const EdgeInsets.all(16), color: Colors.white, margin: const EdgeInsets.only(bottom: 1),
         child: Row(children: [
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(order.customerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            Text("${DateFormat('HH:mm').format(order.date)} • HD${order.id.substring(order.id.length - 6)}", style: const TextStyle(color: Colors.grey, fontSize: 13)),
+            Row(
+              children: [
+                Text(order.customerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                if (isReturned) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: Colors.red[50], borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.red)),
+                    child: const Text("ĐÃ TRẢ", style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold)),
+                  )
+                ]
+              ],
+            ),
+            const SizedBox(height: 2),
+            Text("${DateFormat('HH:mm').format(order.date)} • HD${order.id.length >= 6 ? order.id.substring(order.id.length - 6) : order.id}", style: const TextStyle(color: Colors.grey, fontSize: 13)),
             Text(itemsText, style: TextStyle(color: Colors.grey[700], fontSize: 14)),
           ])),
           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(currencyFormat.format(order.totalPrice), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.blue)),
-            const Text("Tiền mặt", style: TextStyle(color: Colors.grey, fontSize: 12)),
+            Text(
+              currencyFormat.format(order.totalPrice),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: isReturned ? Colors.grey : Colors.blue,
+                decoration: isReturned ? TextDecoration.lineThrough : null,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: _getPaymentMethodColor(order.paymentMethod).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                order.paymentMethod,
+                style: TextStyle(color: _getPaymentMethodColor(order.paymentMethod), fontSize: 11, fontWeight: FontWeight.w600),
+              ),
+            ),
           ]),
         ]),
       ),
@@ -144,8 +191,13 @@ class OrderDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ', decimalDigits: 0);
+    bool isReturned = order.status == 'Đã trả' || order.status == 'returned';
+
+    // Tổng tiền hàng là tổng thành tiền của các món (đã trừ giảm giá từng món nếu có)
+    double totalItemsAmount = order.items.fold(0, (sum, item) => sum + item.totalAmount);
+
     return Scaffold(
-      appBar: AppBar(title: Text("Chi tiết HD${order.id.substring(order.id.length - 6)}")),
+      appBar: AppBar(title: Text("Chi tiết HD${order.id.length >= 6 ? order.id.substring(order.id.length - 6) : order.id}")),
       body: SingleChildScrollView(
         child: Column(children: [
           Container(
@@ -153,32 +205,90 @@ class OrderDetailScreen extends StatelessWidget {
             child: Column(children: [
               _buildInfoRow("Khách hàng", order.customerName, isBold: true),
               _buildInfoRow("Thời gian", DateFormat('dd/MM/yyyy HH:mm').format(order.date)),
-              _buildInfoRow("Trạng thái", order.status == 'completed' ? "Hoàn thành" : "Đã hủy", color: order.status == 'completed' ? Colors.green : Colors.red),
+              _buildInfoRow(
+                "Trạng thái",
+                isReturned ? "Đã trả hàng" : (order.status == 'completed' ? "Hoàn thành" : "Đã hủy"),
+                color: isReturned ? Colors.red : (order.status == 'completed' ? Colors.green : Colors.grey),
+                isBold: true,
+              ),
+              const Divider(height: 16),
+              _buildInfoRow("Phương thức thanh toán", order.paymentMethod, isBold: true),
+              if (order.paymentMethod == 'Đa phương thức') ...[
+                _buildInfoRow(" - Tiền mặt:", fmt.format(order.multiPaymentDetails['cashAmount'] ?? 0)),
+                _buildInfoRow(" - Chuyển khoản (${order.multiPaymentDetails['bankName'] ?? ''}):", fmt.format(order.multiPaymentDetails['qrAmount'] ?? 0)),
+              ],
             ]),
           ),
           const SizedBox(height: 10),
+
+          // DANH SÁCH SẢN PHẨM HIỂN THỊ CÁCH A
           Container(
             color: Colors.white,
-            child: Column(children: [
-              const Padding(padding: EdgeInsets.all(16), child: Row(children: [Text("Sản phẩm", style: TextStyle(fontWeight: FontWeight.bold))])),
-              const Divider(height: 1),
-              ...order.items.map((item) => ListTile(
-                title: Text(item.productName),
-                subtitle: Text("${item.quantity} x ${fmt.format(item.price)}"),
-                trailing: Text(fmt.format(item.totalAmount), style: const TextStyle(fontWeight: FontWeight.bold)),
-              )),
-            ]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(padding: EdgeInsets.all(16), child: Text("Danh sách sản phẩm", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                const Divider(height: 1),
+                ...order.items.map((item) {
+                  double itemDiscountAmount = 0;
+                  if (item.discount > 0) {
+                    itemDiscountAmount = item.isDiscountPercentage
+                        ? (item.price * (item.discount / 100)) * item.quantity
+                        : item.discount * item.quantity;
+                  }
+
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(child: Text(item.productName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15))),
+                                Text("x${item.quantity}", style: const TextStyle(color: Colors.grey, fontSize: 14)),
+                                const SizedBox(width: 16),
+                                Text(fmt.format(item.totalAmount), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                              ],
+                            ),
+                            if (item.discount > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  " (Giảm ${item.isDiscountPercentage ? '${item.discount.toInt()}%' : fmt.format(item.discount)}/món: -${fmt.format(itemDiscountAmount)})",
+                                  style: const TextStyle(color: Colors.red, fontSize: 12, fontStyle: FontStyle.italic),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1),
+                    ],
+                  );
+                }),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
+
+          // TỔNG KẾT HÓA ĐƠN (ĐÃ BỎ DÒNG GIẢM GIÁ TỪNG MÓN)
           Container(
             padding: const EdgeInsets.all(16), color: Colors.white,
             child: Column(children: [
-              _buildInfoRow("Tổng tiền hàng", fmt.format(order.totalPrice)),
-              _buildInfoRow("Giảm giá", "0đ"),
-              const Divider(),
+              _buildInfoRow("Tổng tiền hàng", fmt.format(totalItemsAmount)),
+              if (order.totalDiscount > 0)
+                _buildInfoRow("Giảm giá đơn hàng", "-${fmt.format(order.totalDiscount)}", color: Colors.red),
+              if (order.otherFees > 0)
+                _buildInfoRow("Thu khác", "+${fmt.format(order.otherFees)}", color: Colors.black87),
+              if (order.pointsUsed > 0)
+                _buildInfoRow("Quy đổi điểm", "-${fmt.format(order.pointsUsed * 1000)}", color: Colors.green),
+              const Divider(height: 20),
               _buildInfoRow("KHÁCH PHẢI TRẢ", fmt.format(order.totalPrice), isBold: true, color: Colors.blue),
             ]),
           ),
+          const SizedBox(height: 20),
         ]),
       ),
     );
@@ -202,7 +312,7 @@ class OrderSearchPage extends StatefulWidget {
 }
 
 class _OrderSearchPageState extends State<OrderSearchPage> {
-  String _searchType = "Hóa đơn"; // "Hàng hóa", "Khách hàng", "Đặt hàng", "Vận đơn"
+  String _searchType = "Hóa đơn";
   final TextEditingController _ctrl = TextEditingController();
   List<OrderModel> _results = [];
 
@@ -240,12 +350,9 @@ class _OrderSearchPageState extends State<OrderSearchPage> {
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
               showCheckmark: false,
-
-              backgroundColor: Colors.grey[200], // Màu nền khi chưa chọn (như nút "Ghi chú")
-              selectedColor: Colors.blue,        // Màu nền khi được chọn (như nút "Hàng hóa")
-
+              backgroundColor: Colors.grey[200],
+              selectedColor: Colors.blue,
               shape: const StadiumBorder(side: BorderSide.none),
-
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               label: Text(
                 type,
@@ -254,7 +361,8 @@ class _OrderSearchPageState extends State<OrderSearchPage> {
                   fontWeight: _searchType == type ? FontWeight.bold : FontWeight.normal,
                   fontSize: 15,
                 ),
-              ), selected: _searchType == type,
+              ),
+              selected: _searchType == type,
               onSelected: (s) => setState(() { _searchType = type; _onSearch(_ctrl.text); }),
             ),
           )).toList()),
@@ -266,7 +374,7 @@ class _OrderSearchPageState extends State<OrderSearchPage> {
             final order = _results[i];
             return ListTile(
               title: Text(order.customerName, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text("${DateFormat('dd/MM/yyyy HH:mm').format(order.date)} • HD${order.id.substring(order.id.length - 6)}"),
+              subtitle: Text("${DateFormat('dd/MM/yyyy HH:mm').format(order.date)} • HD${order.id.length >= 6 ? order.id.substring(order.id.length - 6) : order.id}"),
               trailing: Text(NumberFormat.decimalPattern('vi_VN').format(order.totalPrice), style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => OrderDetailScreen(order: order))),
             );

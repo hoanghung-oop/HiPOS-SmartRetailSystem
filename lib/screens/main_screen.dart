@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'sales_screen.dart';
 import 'inventory_screen.dart';
 import 'history_screen.dart';
-import 'overview_screen.dart'; // Màn hình mới
-import 'more_screen.dart';     // Màn hình mới
+import 'overview_screen.dart';
+import 'more_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

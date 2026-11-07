@@ -8,6 +8,9 @@ import 'cashflow_screen.dart';
 import 'order_management_screen.dart';
 import 'return_screen.dart';
 import 'chatbot_screen.dart';
+import 'bank_account_screen.dart';
+import '../services/ai_service.dart';
+import '../models/product_model.dart';
 
 class MoreScreen extends StatefulWidget {
   final Function(int) onTabChange;
@@ -46,12 +49,6 @@ class _MoreScreenState extends State<MoreScreen> {
             children: [
               _buildHeader(),
               const SizedBox(height: 12),
-              _buildSectionTitle("AI & PHÂN TÍCH THÔNG MINH"),
-              _buildMenuBlock([
-                _menuItem(Icons.auto_awesome, "Trợ lý AI", Colors.blue[800]!, () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ChatbotScreen()));
-                }),
-              ]),
               _buildSectionTitle("LỐI TẮT ỨNG DỤNG"),
               _buildMenuBlock([
                 _menuItem(Icons.point_of_sale, "Bán hàng", Colors.blue, () => widget.onTabChange(0)),
@@ -67,11 +64,13 @@ class _MoreScreenState extends State<MoreScreen> {
                 _menuItem(Icons.account_balance_wallet, "Sổ Quỹ", Colors.teal, () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const CashFlowScreen()));
                 }),
+                _menuItem(Icons.qr_code_2, "Tài khoản thụ hưởng", Colors.indigo, () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const BankAccountScreen()));
+                }),
                 _menuItem(Icons.assignment_return, "Trả hàng", Colors.redAccent, () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const ReturnScreen()));
                 }),
                 _menuItem(Icons.assignment, "Đặt hàng", Colors.orangeAccent, () {
-                  // SỬA LỖI: status_filter -> statusFilter
                   Navigator.push(context, MaterialPageRoute(builder: (context) => const OrderManagementScreen(statusFilter: 'pending', title: 'Đơn Đặt Hàng')));
                 }),
               ]),

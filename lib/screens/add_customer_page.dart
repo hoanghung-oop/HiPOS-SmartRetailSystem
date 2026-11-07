@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/customer_model.dart';
 import '../services/firestore_service.dart';
+import 'dart:convert';
 
 class AddCustomerPage extends StatefulWidget {
   final Customer? customerToEdit;
@@ -49,8 +50,9 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     }
     final newC = Customer(
       id: _idCtrl.text, name: _nameCtrl.text, phone: _phone1Ctrl.text, phone2: _phone2Ctrl.text,
-      address: _addressCtrl.text, debt: widget.customerToEdit?.debt ?? 0, birthday: _birthday ?? "",
+      address: _addressCtrl.text, birthday: _birthday ?? "",
       gender: _gender, group: _group, note: _noteCtrl.text, imagePath: _imagePath ?? "",
+      points: widget.customerToEdit?.points ?? 0,
     );
     try {
       await _firestoreService.addCustomer(newC);
@@ -106,10 +108,24 @@ class _AddCustomerPageState extends State<AddCustomerPage> {
     return GestureDetector(
       onTap: () async {
         final picker = ImagePicker();
-        final res = await picker.pickImage(source: ImageSource.gallery);
-        if (res != null) setState(() => _imagePath = res.path);
+        final res = await picker.pickImage(
+          source: ImageSource.gallery,
+          maxWidth: 250,
+          maxHeight: 250,
+          imageQuality: 70,
+        );
+        if (res != null) {
+          final bytes = await res.readAsBytes();
+          setState(() => _imagePath = "data:image/jpeg;base64,${base64Encode(bytes)}");
+        }
       },
-      child: CircleAvatar(radius: 45, backgroundImage: _imagePath != null ? FileImage(File(_imagePath!)) : null, child: _imagePath == null ? const Icon(Icons.camera_alt, size: 30) : null),
+      child: CircleAvatar(
+        radius: 45,
+        backgroundImage: _imagePath != null && _imagePath!.startsWith('data:image')
+            ? MemoryImage(base64Decode(_imagePath!.split(',').last))
+            : (_imagePath != null && File(_imagePath!).existsSync() ? FileImage(File(_imagePath!)) : null),
+        child: _imagePath == null ? const Icon(Icons.camera_alt, size: 30) : null,
+      ),
     );
   }
   Widget _buildField(String label, TextEditingController ctrl, {bool isPhone = false, int maxLines = 1}) {

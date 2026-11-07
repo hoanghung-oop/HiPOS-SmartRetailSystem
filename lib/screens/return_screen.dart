@@ -296,32 +296,34 @@ class _ReturnDetailScreenState extends State<ReturnDetailScreen> {
     );
   }
 
+  bool _isProcessing = false;
+
   void _confirmReturn() async {
-    // 1. Cập nhật cộng lại số lượng hàng vào kho trên Firestore
-    for (var item in widget.order.items) {
-      int returnCount = _returnQty[item.productId] ?? 0;
-      if (returnCount > 0) {
-        await FirebaseFirestore.instance.collection('products').doc(item.productId).update({
-          'quantity': FieldValue.increment(returnCount)
-        });
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
+
+    try {
+      // GỌI HÀM BATCH TỪ FIRESTORE SERVICE (Đã bao gồm Trừ Kho, Sổ Quỹ, Thu hồi điểm)
+      await _firestoreService.processReturn(
+        originalOrder: widget.order,
+        returnQty: _returnQty,
+        totalRefund: _totalRefund,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Trả hàng & Hoàn tiền thành công!"), backgroundColor: Colors.green)
+        );
+        Navigator.pop(context, true);
       }
-    }
-
-    // 2. Lưu phiếu chi hoàn tiền
-    final trans = TransactionModel(
-      id: "TH${DateTime.now().millisecondsSinceEpoch}",
-      note: "Hoàn tiền trả đơn ${widget.order.id} - ${widget.order.customerName}",
-      amount: _totalRefund,
-      date: DateTime.now(),
-      isExpense: true,
-      customerId: "", // Nếu sau này cần trừ công nợ thì gán ID vào đây
-      paymentMethod: "Tiền mặt",
-    );
-    await _firestoreService.saveTransaction(trans);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Trả hàng và hoàn tiền thành công!"), backgroundColor: Colors.green));
-      Navigator.pop(context, true);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Lỗi khi xử lý trả hàng!"), backgroundColor: Colors.red)
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isProcessing = false);
     }
   }
 }

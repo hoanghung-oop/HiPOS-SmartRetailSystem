@@ -56,22 +56,34 @@ class Product {
   }
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    return Product(
-      id: json['id'],
-      name: json['name'],
-      price: double.tryParse(json['price'].toString()) ?? 0,
-      importPrice: double.tryParse(json['importPrice']?.toString() ?? '0') ?? 0,
-      quantity: int.tryParse(json['quantity'].toString()) ?? 0,
-      barcode: json['barcode'] ?? '',
-      imagePath: json['imagePath'] ?? '',
-      category: json['category'] ?? 'Chưa phân loại',
-      brand: json['brand'] ?? 'Không có',
-      description: json['description'] ?? '',
-      unit: json['unit'] ?? '',
-      minStock: int.tryParse(json['minStock']?.toString() ?? '0') ?? 0,
-      otherInfo: json['otherInfo'] ?? '',
-      isDirectSale: json['isDirectSale'] ?? true,
-      isPointAccumulation: json['isPointAccumulation'] ?? true,
-    );
+    try {
+      // Dùng toString() và các giá trị mặc định để bọc chống lỗi Null hoàn toàn
+      return Product(
+        id: json['id']?.toString() ?? '',
+        name: json['name']?.toString() ?? 'Sản phẩm lỗi tên',
+        price: double.tryParse(json['price']?.toString() ?? '0') ?? 0,
+        importPrice: double.tryParse(json['importPrice']?.toString() ?? '0') ?? 0,
+        quantity: int.tryParse(json['quantity']?.toString() ?? '0') ?? 0,
+        barcode: json['barcode']?.toString() ?? '',
+        imagePath: json['imagePath']?.toString() ?? '',
+        category: json['category']?.toString() ?? 'Chưa phân loại',
+        brand: json['brand']?.toString() ?? 'Không có',
+        description: json['description']?.toString() ?? '',
+        unit: json['unit']?.toString() ?? '',
+        minStock: int.tryParse(json['minStock']?.toString() ?? '0') ?? 0,
+        otherInfo: json['otherInfo']?.toString() ?? '',
+        // Ép kiểu an toàn cho Boolean
+        isDirectSale: json['isDirectSale'] is bool ? json['isDirectSale'] : true,
+        isPointAccumulation: json['isPointAccumulation'] is bool ? json['isPointAccumulation'] : true,
+      );
+    } catch (e) {
+      // KỊCH BẢN CỨU NGUY: Nếu 1 sản phẩm bị hỏng nặng, tạo sản phẩm giả để Stream tiếp tục chạy
+      return Product(
+        id: 'ERROR_${DateTime.now().millisecondsSinceEpoch}',
+        name: 'Lỗi dữ liệu (Hãy xóa SP này)',
+        price: 0,
+        quantity: 0,
+      );
+    }
   }
 }

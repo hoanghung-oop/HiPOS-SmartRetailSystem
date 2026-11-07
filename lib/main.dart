@@ -5,9 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart'; 
 import 'screens/login_screen.dart';
 import 'screens/main_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: "env.txt");
 
   try {
     await Firebase.initializeApp(

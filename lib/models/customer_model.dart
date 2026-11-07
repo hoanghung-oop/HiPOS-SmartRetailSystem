@@ -6,12 +6,12 @@ class Customer {
   String phone;
   String phone2;
   String address;
-  double debt;
   String birthday;
   String gender;
   String group;
   String note;
   String imagePath;
+  int points;
 
   Customer({
     required this.id,
@@ -19,12 +19,12 @@ class Customer {
     required this.phone,
     this.phone2 = '',
     this.address = '',
-    this.debt = 0,
     this.birthday = '',
     this.gender = 'Khác',
     this.group = 'Mặc định',
     this.note = '',
     this.imagePath = '',
+    this.points = 0,
   });
 
   Map<String, dynamic> toJson() => {
@@ -33,12 +33,12 @@ class Customer {
     'phone': phone,
     'phone2': phone2,
     'address': address,
-    'debt': debt,
     'birthday': birthday,
     'gender': gender,
     'group': group,
     'note': note,
     'imagePath': imagePath,
+    'points': points,
   };
 
   factory Customer.fromJson(Map<String, dynamic> json) {
@@ -48,12 +48,12 @@ class Customer {
       phone: json['phone'] ?? '',
       phone2: json['phone2'] ?? '',
       address: json['address'] ?? '',
-      debt: double.tryParse(json['debt']?.toString() ?? '0') ?? 0,
       birthday: json['birthday'] ?? '',
       gender: json['gender'] ?? 'Khác',
       group: json['group'] ?? 'Mặc định',
       note: json['note'] ?? '',
       imagePath: json['imagePath'] ?? '',
+      points: json['points'] ?? 0,
     );
   }
 }
