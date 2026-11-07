@@ -52,13 +52,13 @@ Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình
 
 ## 🏗️ Kiến Trúc & công nghệ
 
-- **Ngôn ngữ & Framework:** Dart (Sound Null Safety) & Flutter SDK
+- **Ngôn ngữ & Framework:** Dart và Flutter SDK
 - **Kiến trúc phần mềm:** Layered Architecture kết hợp mô hình Boundary-Control-Entity (BCE)
-- **Cơ sở dữ liệu:** Cloud Firestore (Mô hình phân vùng đa người dùng Multi-tenant: `users/{userId}/*`)
-- **Quản lý phiên & xác thực:** Firebase Authentication
+- **Cơ sở dữ liệu:** Cloud Firestore (Mô hình phân vùng đa người dùng Multi-tenant
+- **Quản lý phiên và xác thực:** Firebase Authentication
 - **Trí tuệ nhân tạo:** Google Generative AI SDK (`gemini-2.5-flash`)
 - **Bộ nhớ đệm cục bộ:** `shared_preferences`
-- **Xử lý âm thanh & iọng nói:** `speech_to_text`
+- **Xử lý âm thanh và giọng nói:** `speech_to_text`
 - **Quét quang học:** `simple_barcode_scanner`
 
 ---
