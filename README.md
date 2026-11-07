@@ -43,7 +43,7 @@ Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình
 - **Thanh toán VietQR động chuẩn NAPAS 247:** Tự động sinh chuỗi mã QR chuyển khoản định danh kèm chính xác số tiền cần thu; hỗ trợ luồng thanh toán đa phương thức (kết hợp tiền mặt và quét QR động).
 - **Thẩm định nguồn hàng qua Multimodal Vision AI (Gemini Scout):** Chụp ảnh bao bì thực tế để nhận diện thương hiệu, định giá tham chiếu, đánh giá nguy cơ hàng nhái và tự động điền dữ liệu vào form tạo hàng.
 - **Toàn vẹn giao dịch:** Sử dụng `WriteBatch` trên Cloud Firestore đảm bảo cập nhật đồng bộ 4 bảng: Hóa đơn (`orders`), trừ kho (`products`), ghi nhận sổ quỹ (`transactions`) và cập nhật điểm thưởng (`customers`) tuân thủ nghiêm ngặt nguyên tắc ACID.
-- **Trợ lý Cố vấn chiến lược bán lẻ:** Đàm thoại hai chiều thông minh, tự động tiêm ngữ cảnh vận hành thực tế (doanh thu trong ngày, giá trị vốn tồn kho, danh mục 30 mặt hàng chủ lực) để đưa ra khuyến nghị kinh doanh theo mùa vụ.
+- **Trợ lý cố vấn chiến lược bán lẻ:** Đàm thoại hai chiều thông minh, tự động tiêm ngữ cảnh vận hành thực tế (doanh thu trong ngày, giá trị vốn tồn kho, danh mục 30 mặt hàng chủ lực) để đưa ra khuyến nghị kinh doanh theo mùa vụ.
 - **Gợi ý bán kèm thông minh:** Khi thao tác chọn hàng, AI tự động phân tích giỏ hàng hiện tại đối chiếu với hàng tồn khả dụng trong kho để đề xuất ngay 3 mặt hàng bán kèm phù hợp.
 - **Tối ưu hóa tài nguyên:** Áp dụng Cache-Aside Pattern với `SharedPreferences` cho điểm tin kinh doanh hàng ngày, đảm bảo chỉ gọi API 01 lần/ngày, triệt tiêu chi phí hạn mức.
 - **Bảo mật giao dịch tài chính nội bộ:** Thiết lập hàng rào xác thực bằng mã PIN 4 chữ số của chủ cửa hàng khi cấu hình tài khoản ngân hàng thụ hưởng, ngăn chặn gian lận tráo mã QR cá nhân.
