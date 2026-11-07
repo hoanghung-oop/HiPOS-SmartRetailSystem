@@ -77,7 +77,7 @@ lib/
 
 ---
 
-## 🚀 Cài Đặt và khởi chạy
+## 🚀 Cài đặt và khởi chạy
 ### 1. Yêu cầu môi trường
 - Flutter SDK $\ge 3.19.0$
 - Dart SDK $\ge 3.0.0$
