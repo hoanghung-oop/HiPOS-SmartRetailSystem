@@ -1,50 +1,96 @@
 # HiPOS - Hệ Thống Quản Lý Bán Hàng Thông Minh (Smart POS with AI Integration)
 
-HiPOS là giải pháp phần mềm quản lý bán lẻ đa nền tảng (Mobile & Web) được phát triển trên nền tảng **Flutter**, tích hợp hạ tầng không máy chủ **Firebase BaaS** và Trí tuệ nhân tạo **Google Gemini 2.5 Flash**. Hệ thống giải quyết toàn diện bài toán tự động hóa vận hành, kiểm soát dòng tiền, thẩm định sản phẩm và cố vấn kinh doanh cho các mô hình bán lẻ vừa và nhỏ.
+<p align="center">
+  <img src="assets/icons/app_icon.png" alt="HiPOS Logo" width="120" height="120" style="border-radius: 20%">
+</p>
+
+<p align="center">
+  <strong>Giải pháp quản lý bán lẻ đa nền tảng kết hợp Trí tuệ nhân tạo thế hệ mới</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-3.19+-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Dart-3.0+-0175C2?style=for-the-badge&logo=dart&logoColor=white" alt="Dart">
+  <img src="https://img.shields.io/badge/Firebase-BaaS-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase">
+  <img src="https://img.shields.io/badge/Google_Gemini-2.5_Flash-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini">
+  <img src="https://img.shields.io/badge/Platform-Android_|_Web-green?style=for-the-badge" alt="Platform">
+</p>
 
 ---
 
-## 🌟 Tính Năng Nổi Bật (Key Features)
+## 📖 Giới Thiệu
 
-- **Voice POS Pipeline:** Nhận diện và bóc tách ngôn ngữ tự nhiên tiếng Việt (tự động khử dấu, tách mệnh đề liên từ và trích xuất số lượng hàng hóa), hỗ trợ lên đơn rảnh tay tại quầy thu ngân.
-- **Thanh toán VietQR động chuẩn NAPAS 247:** Tự động sinh mã chuyển khoản định danh kèm số tiền thực tế theo thời gian thực; hỗ trợ linh hoạt luồng thanh toán Đa phương thức (tiền mặt + chuyển khoản).
-- **Thẩm định hàng hóa qua Multimodal AI (Gemini Vision):** Chụp ảnh bao bì sản phẩm để phân tích thương hiệu, ước tính khoảng giá thị trường, cảnh báo hàng giả và tự động nạp dữ liệu vào form tạo hàng.
-- **Toàn vẹn giao dịch (Atomic Batch Write):** Sử dụng cơ chế WriteBatch trên Cloud Firestore đảm bảo cập nhật đồng bộ 4 thực thể: Hóa đơn, Tồn kho sản phẩm, Sổ quỹ thu chi và Điểm tích lũy thành viên (tuân thủ nghiêm ngặt nguyên tắc ACID).
-- **Trợ lý Cố vấn Chiến lược Bán lẻ (AI CSO):** Hội thoại hai chiều thông minh, tự động tiêm ngữ cảnh vận hành (doanh thu trong ngày, tồn kho, mặt hàng chủ lực) để đưa ra các đề xuất kinh doanh theo mùa vụ.
-- **Tối ưu hóa tài nguyên (Smart Caching):** Áp dụng Cache-Aside Pattern với SharedPreferences cho Điểm tin hàng ngày, giảm thiểu tối đa chi phí hạn ngạch API.
-- **Bảo mật cấu hình tài chính:** Cơ chế xác thực mã PIN 4 chữ số nội bộ ngăn chặn rủi ro gian lận tráo đổi tài khoản ngân hàng thụ hưởng.
+**HiPOS** là hệ thống phần mềm quản lý bán lẻ đa nền tảng được xây dựng trên framework **Flutter**, khai thác kiến trúc không máy chủ **Firebase BaaS** (Cloud Firestore, Firebase Authentication) kết hợp sức mạnh phân tích của mô hình đa phương thức **Google Gemini 2.5 Flash**. 
+
+Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình bán hàng, kiểm soát dòng tiền, bóc tách đơn hàng rảnh tay, thẩm định nguồn hàng bao bì và cố vấn chiến lược kinh doanh thông minh cho các mô hình bán lẻ vừa và nhỏ.
 
 ---
 
-## 🏗️ Kiến Trúc Hệ Thống (Architecture & Tech Stack)
+## 🌟 Tính Năng Cốt Lõi
 
-- **Framework:** [Flutter](https://flutter.dev/) (Dart $\ge$ 3.0.0, Sound Null Safety)
-- **Kiến trúc:** Layered Architecture kết hợp mô hình Boundary-Control-Entity (BCE)
-- **Cơ sở dữ liệu:** [Cloud Firestore](https://firebase.google.com/docs/firestore) (Mô hình phân vùng đa người dùng Multi-tenant: `users/{userId}/*`)
-- **Xác thực:** [Firebase Authentication](https://firebase.google.com/docs/auth)
-- **Trí tuệ nhân tạo:** [Google Gemini API](https://ai.google.dev/) (`gemini-2.5-flash`) qua thư viện `google_generative_ai`
+- **Voice POS Pipeline:** Bóc tách ngôn ngữ tự nhiên tiếng Việt thời gian thực (tự động khử dấu thanh, phân đoạn mệnh đề liên từ, nhận diện từ chỉ số lượng ngữ nghĩa) hỗ trợ lên đơn hàng rảnh tay tại quầy thu ngân.
+- **Thanh toán VietQR động chuẩn NAPAS 247:** Tự động sinh chuỗi mã QR chuyển khoản định danh kèm chính xác số tiền cần thu; hỗ trợ luồng thanh toán đa phương thức (kết hợp tiền mặt và quét QR động).
+- **Thẩm định nguồn hàng qua Multimodal Vision AI (Gemini Scout):** Chụp ảnh bao bì thực tế để nhận diện thương hiệu, định giá tham chiếu, đánh giá nguy cơ hàng nhái và tự động điền dữ liệu vào form tạo hàng.
+- **Toàn vẹn giao dịch:** Sử dụng `WriteBatch` trên Cloud Firestore đảm bảo cập nhật đồng bộ 4 bảng: Hóa đơn (`orders`), trừ kho (`products`), ghi nhận sổ quỹ (`transactions`) và cập nhật điểm thưởng (`customers`) tuân thủ nghiêm ngặt nguyên tắc ACID.
+- **Trợ lý Cố vấn chiến lược bán lẻ:** Đàm thoại hai chiều thông minh, tự động tiêm ngữ cảnh vận hành thực tế (doanh thu trong ngày, giá trị vốn tồn kho, danh mục 30 mặt hàng chủ lực) để đưa ra khuyến nghị kinh doanh theo mùa vụ.
+**Gợi ý sản phẩm: Sau 5 giây cho sản phẩm vào giỏ hàng đề xuất hàng kèm theo .
+- **Tối ưu hóa tài nguyên:** Áp dụng Cache-Aside Pattern với `SharedPreferences` cho điểm tin kinh doanh hàng ngày, đảm bảo chỉ gọi API 01 lần/ngày, triệt tiêu chi phí hạn mức.
+- **Bảo mật giao dịch tài chính nội bộ:** Thiết lập hàng rào xác thực bằng mã PIN 4 chữ số của chủ cửa hàng khi cấu hình tài khoản ngân hàng thụ hưởng, ngăn chặn gian lận tráo mã QR cá nhân.
+
+---
+
+## 🏗️ Kiến Trúc & công Nghệ
+
+- **Ngôn ngữ & Framework:** Dart (Sound Null Safety) & Flutter SDK
+- **Kiến trúc phần mềm:** Layered Architecture kết hợp mô hình Boundary-Control-Entity (BCE)
+- **Cơ sở dữ liệu:** Cloud Firestore (Mô hình phân vùng đa người dùng Multi-tenant: `users/{userId}/*`)
+- **Quản lý phiên & xác thực:** Firebase Authentication
+- **Trí tuệ nhân tạo:** Google Generative AI SDK (`gemini-2.5-flash`)
 - **Bộ nhớ đệm cục bộ:** `shared_preferences`
-- **Xử lý âm thanh:** `speech_to_text`
-- **Cổng thanh toán:** API VietQR Switch
+- **Xử lý âm thanh & iọng nói:** `speech_to_text`
+- **Quét quang học:** `simple_barcode_scanner`
 
 ---
 
-## 🚀 Cài Đặt Và Khởi Chạy (Installation & Setup)
+## 📂 Cấu Trúc Thư Mục (Project Structure)
 
-### 1. Yêu cầu tiên quyết
+```text
+lib/
+├── models/             # Định nghĩa thực thể dữ liệu (Product, Order, Customer,...)
+├── services/           # Tầng nghiệp vụ cốt lõi (FirestoreService, AIService)
+├── screens/            # Giao diện chức năng (Sales, Payment, Inventory, Overview,...)
+├── widgets/            # Thành phần UI dùng chung (ReceiptDialog, PinSecurityDialog,...)
+├── utils/              # Tiện ích chuẩn hóa tiếng Việt, định dạng tiền tệ VND
+└── main.dart           # Điểm khởi chạy và cấu hình ứng dụng
+```
+
+---
+
+## 🚀 Cài Đặt Và khởi chạy
+### 1. Yêu cầu môi trường
 - Flutter SDK $\ge 3.19.0$
 - Dart SDK $\ge 3.0.0$
-- Công cụ biên dịch: Android Studio / VS Code
-- Tài khoản [Google AI Studio](https://aistudio.google.com/) để lấy `GEMINI_API_KEY`
-- Dự án trên [Firebase Console](https://console.firebase.google.com/)
+- Công cụ: Android Studio hoặc Visual Studio Code
+- Tài khoản Google AI Studio để lấy GEMINI_API_KEY
+- Dự án Firebase Console đã kích hoạt Authentication và Firestore
 
 ### 2. Cài đặt mã nguồn
-```bash
 # Clone repository
-git clone [https://github.com/your-username/HiPOS-SmartRetailSystem.git](https://github.com/your-username/HiPOS-SmartRetailSystem.git)
+git clone [https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git(https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git)
 
 # Di chuyển vào thư mục dự án
 cd HiPOS-SmartRetailSystem
 
-# Cài đặt các gói thư viện phụ thuộc
+# Cài đặt các gói thư viện
 flutter pub get
+
+### 3. Cấu hình biến môi trường và Firebase
+- Tạo tệp .env tại thư mục gốc và cung cấp khóa API:Đoạn mãGEMINI_API_KEY=your_gemini_api_key_here
+- Đặt tệp cấu hình google-services.json tải từ Firebase Console vào đường dẫn:android/app/google-services.json
+
+### 4. Khởi chạy ứng dụng
+# Khởi chạy trên thiết bị di động Android
+flutter run
+
+# Khởi chạy trên nền tảng Web (bảo mật API Key qua cờ dart-define)
+flutter run -d chrome --dart-define=GEMINI_API_KEY=your_gemini_api_key_here
