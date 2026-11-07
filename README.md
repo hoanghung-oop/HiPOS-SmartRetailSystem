@@ -78,27 +78,26 @@ lib/
 ---
 
 ## 🚀 Cài Đặt và khởi chạy
-Yêu cầu môi trường
+### 1. Yêu cầu môi trường
 - Flutter SDK $\ge 3.19.0$
 - Dart SDK $\ge 3.0.0$
 - Công cụ: Android Studio hoặc Visual Studio Code
 - Tài khoản Google AI Studio để lấy GEMINI_API_KEY
 - Dự án Firebase Console đã kích hoạt Authentication và Firestore
 
-- Cài đặt mã nguồn
+### 2. Cài đặt mã nguồn
 # Clone repository
 git clone [https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git(https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git)
-
 # Di chuyển vào thư mục dự án
 cd HiPOS-SmartRetailSystem
 # Cài đặt các gói thư viện
 flutter pub get
 
-- Cấu hình biến môi trường và Firebase
+### 3. Cấu hình biến môi trường và Firebase
 Tạo tệp .env tại thư mục gốc và cung cấp khóa API:Đoạn mãGEMINI_API_KEY=your_gemini_api_key_here
 Đặt tệp cấu hình google-services.json tải từ Firebase Console vào đường dẫn:android/app/google-services.json
 
-- Khởi chạy ứng dụng
+### 4. Khởi chạy ứng dụng
 # Khởi chạy trên thiết bị di động Android
 flutter run
 
