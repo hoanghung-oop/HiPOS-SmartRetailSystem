@@ -86,11 +86,11 @@ lib/
 - Dự án Firebase Console đã kích hoạt Authentication và Firestore
 
 ### 2. Cài đặt mã nguồn
-- Clone repository
+# Clone repository
 git clone [https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git(https://github.com/hoanghung-oop/HiPOS-SmartRetailSystem.git)
-- Di chuyển vào thư mục dự án
+# Di chuyển vào thư mục dự án
 cd HiPOS-SmartRetailSystem
-- Cài đặt các gói thư viện
+# Cài đặt các gói thư viện
 flutter pub get
 
 ### 3. Cấu hình biến môi trường và Firebase
@@ -98,8 +98,8 @@ flutter pub get
 - Đặt tệp cấu hình google-services.json tải từ Firebase Console vào đường dẫn:android/app/google-services.json
 
 ### 4. Khởi chạy ứng dụng
-- Khởi chạy trên thiết bị di động Android
+# Khởi chạy trên thiết bị di động Android
 flutter run
 
-- Khởi chạy trên nền tảng Web (bảo mật API Key qua cờ dart-define)
+# Khởi chạy trên nền tảng Web (bảo mật API Key qua cờ dart-define)
 flutter run -d chrome --dart-define=GEMINI_API_KEY=your_gemini_api_key_here
