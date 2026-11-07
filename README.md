@@ -22,7 +22,7 @@
 
 **HiPOS** là hệ thống phần mềm quản lý bán lẻ đa nền tảng được xây dựng trên framework **Flutter**, khai thác kiến trúc không máy chủ **Firebase BaaS** (Cloud Firestore, Firebase Authentication) kết hợp sức mạnh phân tích của mô hình đa phương thức **Google Gemini 2.5 Flash**. 
 
-Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình bán hàng, kiểm soát dòng tiền, bóc tách đơn hàng rảnh tay, thẩm định nguồn hàng bao bì và cố vấn chiến lược kinh doanh thông minh cho các mô hình bán lẻ vừa và nhỏ.
+Hệ thống giải quyết toàn diện bài toán tự động hóa quy trình bán hàng, kiểm soát dòng tiền, bóc tách đơn hàng, thẩm định nguồn hàng bao bì và cố vấn chiến lược kinh doanh thông minh cho các mô hình bán lẻ vừa và nhỏ.
 
 ---
 
